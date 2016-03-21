@@ -15,7 +15,7 @@ star_wars = media.Movie("Star Wars", "An epic story set in a galaxy", "http://t0
 #star_wars.show_trailer()
 
 movies = [toy_story, avatar, star_wars]
-#fresh_tomatoes.open_movies_page(movies)
+fresh_tomatoes.open_movies_page(movies)
 
 #print(media.Movie.VALID_RATINGS)
 
