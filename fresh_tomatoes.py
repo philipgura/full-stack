@@ -55,7 +55,7 @@ main_page_head = '''
             top: 0;
             background-color: white;
         }
-        .outline {
+        .outline-box {
             outline: 1px solid gray;
         }
     </style>
@@ -126,7 +126,7 @@ movie_tile_content = '''
 <div class="col-md-6 col-lg-4 movie-tile text-center" data-trailer-youtube-id="{trailer_youtube_id}" data-toggle="modal" data-target="#trailer">
     <img src="{poster_image_url}" width="220" height="342">
     <h2>{movie_title}</h2>
-    <h4><span class="outline">{rating}</span> {release_year}</h4>
+    <h4><span class="outline-box">{rating}</span>&nbsp; {release_year}</h4>
 </div>
 '''
 
