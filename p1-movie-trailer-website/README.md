@@ -4,4 +4,4 @@ The Movie Trailer Website project consists of server-side code to store a list o
 
 ### Run Project
 
-Run entertainment_center.py it will build fresh_tomatoes.html file with movie posters and other relavent information.
+Run `entertainment_center.py` it will build `fresh_tomatoes.html` file with movie posters and other relavent information.
