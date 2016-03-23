@@ -10,8 +10,8 @@ movies.append(media.Movie(
     "1981", "PG"))
 movies.append(media.Movie(
     "Avatar",
-# noqa
     "http://t0.gstatic.com/images?q=tbn:ANd9GcQCfmvrE4fMo2cd8esc7mDZPtFSJThAujddMPkRtti1_ij6u-jp",
+# noqa
     "https://www.youtube.com/watch?v=cRdxXPV9GNQ",
     "2009", "PG-13"))
 movies.append(media.Movie(
