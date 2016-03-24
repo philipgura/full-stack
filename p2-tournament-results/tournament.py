@@ -4,6 +4,7 @@
 #
 
 import psycopg2
+import bleach
 
 
 def connect():
@@ -13,14 +14,40 @@ def connect():
 
 def deleteMatches():
     """Remove all the match records from the database."""
+    DB = connect()
+    cur = DB.cursor()
+
+    cur.execute("DELETE FROM matches;")
+
+    DB.commit()
+    DB.close()
 
 
 def deletePlayers():
     """Remove all the player records from the database."""
+    DB = connect()
+    cur = DB.cursor()
+
+    cur.execute("DELETE FROM players;")
+
+    DB.commit()
+    DB.close()
 
 
 def countPlayers():
     """Returns the number of players currently registered."""
+    DB = connect()
+    cur = DB.cursor()
+
+    cur.execute("SELECT COALESCE(count(*)) FROM players")
+
+    rows = cur.fetchall()
+    DB.close()
+
+    for row in rows:
+        count = row[0]
+
+    return count
 
 
 def registerPlayer(name):
@@ -32,6 +59,14 @@ def registerPlayer(name):
     Args:
       name: the player's full name (need not be unique).
     """
+    DB = connect()
+    cur = DB.cursor()
+
+    cur.execute("INSERT INTO players (name) values (%s);", 
+        (bleach.clean(name),))
+
+    DB.commit()
+    DB.close()
 
 
 def playerStandings():
@@ -48,6 +83,24 @@ def playerStandings():
         matches: the number of matches the player has played
     """
 
+    DB = connect()
+    cur = DB.cursor()
+
+    cur.execute('''
+        SELECT P.id, P.name, 
+            COUNT(CASE WHEN MP.is_win THEN 1 ELSE NULL END) AS wins,
+            COUNT(MP.player_id) AS matches
+        FROM players AS P
+        LEFT JOIN match_player AS MP ON MP.player_id = P.id
+        GROUP BY P.id
+        ORDER BY wins DESC;
+        ''')
+
+    rows = cur.fetchall()
+    DB.close()
+
+    return rows
+
 
 def reportMatch(winner, loser):
     """Records the outcome of a single match between two players.
@@ -56,6 +109,28 @@ def reportMatch(winner, loser):
       winner:  the id number of the player who won
       loser:  the id number of the player who lost
     """
+    DB = connect()
+    cur = DB.cursor()
+
+    # insert record in to matches
+    cur.execute("INSERT INTO matches DEFAULT VALUES;")
+
+    # insert record in to match_players (winner) 
+    # with matches id (just inserted)
+    cur.execute('''
+        INSERT INTO match_player (match_id, player_id, is_win) 
+        VALUES (currval(pg_get_serial_sequence('matches','id')), %s, '1');
+        ''', (bleach.clean(winner),))
+
+    # insert record in to match_players (looser) 
+    # with matches id (just inserted)
+    cur.execute('''
+        INSERT INTO match_player (match_id, player_id, is_win)
+        VALUES (currval(pg_get_serial_sequence('matches','id')), %s, '0');
+        ''',(bleach.clean(loser),))
+
+    DB.commit()
+    DB.close()
  
  
 def swissPairings():
@@ -74,4 +149,13 @@ def swissPairings():
         name2: the second player's name
     """
 
+    standings = playerStandings()
+    pairing = []
+
+    for i in range(0, (len(standings)), 2):
+        pairing.append(
+            [standings[i][0], standings[i][1], 
+            standings[i+1][0], standings[i+1][1]])
+
+    return pairing
 
