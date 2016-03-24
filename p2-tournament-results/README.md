@@ -7,4 +7,4 @@ This project has two parts: defining the database schema (SQL table definitions)
 ####Files
 - tournament.sql  - this file is used to set up database schema.
 - tournament.py - this file is used to provide access to the database via a library of functions which can add, delete or query data in the database to another python program (a client program). 
-- tournament_extra_test.py - this is a client program (this file was changed slightly to acomedate some of the extra credit functionality) which will use the functions written in the tournament.py module.
+- tournament_extra_test.py - this is a client program (this file was changed slightly to accommodate some of the extra credit functionality) which will use the functions written in the tournament.py module.
