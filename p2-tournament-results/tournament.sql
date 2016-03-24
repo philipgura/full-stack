@@ -7,7 +7,7 @@
 -- these lines here.
 
 
---CREATE DATABASE tournament;
+CREATE DATABASE tournament;
 
 DROP TABLE matches CASCADE;
 DROP TABLE players CASCADE;
@@ -24,10 +24,12 @@ CREATE TABLE matches (
 	data_added timestamp DEFAULT CURRENT_TIMESTAMP
 );
 
+CREATE TYPE status AS ENUM ('win', 'lose', 'draw');
+
 CREATE TABLE match_player (
 	match_id integer NOT NULL REFERENCES matches(id) ON DELETE CASCADE,
 	player_id integer NOT NULL REFERENCES players(id) ON DELETE CASCADE,
-	is_win boolean NOT NULL DEFAULT 0,
+	match_status status NOT NULL,
 	data_added timestamp DEFAULT CURRENT_TIMESTAMP,
 	PRIMARY KEY (match_id, player_id)
 );

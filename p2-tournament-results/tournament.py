@@ -86,14 +86,22 @@ def playerStandings():
     DB = connect()
     cur = DB.cursor()
 
+    # inner query gets OMW (Opponent Match Wins)
+    # order 1st by wins and 2nd by OMW
+
     cur.execute('''
         SELECT P.id, P.name, 
-            COUNT(CASE WHEN MP.is_win THEN 1 ELSE NULL END) AS wins,
-            COUNT(MP.player_id) AS matches
+            COUNT(CASE WHEN MP.match_status = 'win' THEN 1 ELSE NULL END) AS wins,
+            COUNT(MP.player_id) AS matches,
+            (SELECT COUNT(CASE WHEN MP2S.match_status = 'win' THEN 1 ELSE NULL END)
+             FROM match_player AS MPS
+             LEFT JOIN match_player AS MP2S ON MP2S.match_id = MPS.match_id 
+                                            AND MP2S.player_id != P.id
+             WHERE MPS.player_id = P.id) AS omw
         FROM players AS P
         LEFT JOIN match_player AS MP ON MP.player_id = P.id
         GROUP BY P.id
-        ORDER BY wins DESC;
+        ORDER BY wins DESC, omw DESC;
         ''')
 
     rows = cur.fetchall()
@@ -102,13 +110,22 @@ def playerStandings():
     return rows
 
 
-def reportMatch(winner, loser):
+def reportMatch(winner, loser, is_draw = 0):
     """Records the outcome of a single match between two players.
 
     Args:
       winner:  the id number of the player who won
       loser:  the id number of the player who lost
     """
+
+    #  accommodate draw status
+    winner_status = 'win'
+    loser_status = 'lose'
+
+    if is_draw:
+        winner_status = 'draw'
+        loser_status = 'draw'
+
     DB = connect()
     cur = DB.cursor()
 
@@ -118,16 +135,16 @@ def reportMatch(winner, loser):
     # insert record in to match_players (winner) 
     # with matches id (just inserted)
     cur.execute('''
-        INSERT INTO match_player (match_id, player_id, is_win) 
-        VALUES (currval(pg_get_serial_sequence('matches','id')), %s, '1');
-        ''', (bleach.clean(winner),))
+        INSERT INTO match_player (match_id, player_id, match_status) 
+        VALUES (currval(pg_get_serial_sequence('matches','id')), %s, %s);
+        ''', (bleach.clean(winner), winner_status))
 
     # insert record in to match_players (looser) 
     # with matches id (just inserted)
     cur.execute('''
-        INSERT INTO match_player (match_id, player_id, is_win)
-        VALUES (currval(pg_get_serial_sequence('matches','id')), %s, '0');
-        ''',(bleach.clean(loser),))
+        INSERT INTO match_player (match_id, player_id, match_status)
+        VALUES (currval(pg_get_serial_sequence('matches','id')), %s, %s);
+        ''',(bleach.clean(loser), loser_status))
 
     DB.commit()
     DB.close()
