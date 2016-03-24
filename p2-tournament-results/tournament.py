@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# 
+#
 # tournament.py -- implementation of a Swiss-system tournament
 #
 
@@ -52,18 +52,18 @@ def countPlayers():
 
 def registerPlayer(name):
     """Adds a player to the tournament database.
-  
+
     The database assigns a unique serial id number for the player.  (This
     should be handled by your SQL database schema, not in your Python code.)
-  
+
     Args:
       name: the player's full name (need not be unique).
     """
     DB = connect()
     cur = DB.cursor()
 
-    cur.execute("INSERT INTO players (name) values (%s);", 
-        (bleach.clean(name),))
+    cur.execute("INSERT INTO players (name) values (%s);",
+                (bleach.clean(name),))
 
     DB.commit()
     DB.close()
@@ -90,12 +90,12 @@ def playerStandings():
     # order 1st by wins and 2nd by OMW
 
     cur.execute('''
-        SELECT P.id, P.name, 
+        SELECT P.id, P.name,
             COUNT(CASE WHEN MP.match_status = 'win' THEN 1 ELSE NULL END) AS wins,
             COUNT(MP.player_id) AS matches,
             (SELECT COUNT(CASE WHEN MP2S.match_status = 'win' THEN 1 ELSE NULL END)
              FROM match_player AS MPS
-             LEFT JOIN match_player AS MP2S ON MP2S.match_id = MPS.match_id 
+             LEFT JOIN match_player AS MP2S ON MP2S.match_id = MPS.match_id
                                             AND MP2S.player_id != P.id
              WHERE MPS.player_id = P.id) AS omw
         FROM players AS P
@@ -110,7 +110,7 @@ def playerStandings():
     return rows
 
 
-def reportMatch(winner, loser, is_draw = 0):
+def reportMatch(winner, loser, is_draw=0):
     """Records the outcome of a single match between two players.
 
     Args:
@@ -132,32 +132,32 @@ def reportMatch(winner, loser, is_draw = 0):
     # insert record in to matches
     cur.execute("INSERT INTO matches DEFAULT VALUES;")
 
-    # insert record in to match_players (winner) 
-    # with matches id (just inserted)
-    cur.execute('''
-        INSERT INTO match_player (match_id, player_id, match_status) 
-        VALUES (currval(pg_get_serial_sequence('matches','id')), %s, %s);
-        ''', (bleach.clean(winner), winner_status))
-
-    # insert record in to match_players (looser) 
+    # insert record in to match_players (winner)
     # with matches id (just inserted)
     cur.execute('''
         INSERT INTO match_player (match_id, player_id, match_status)
         VALUES (currval(pg_get_serial_sequence('matches','id')), %s, %s);
-        ''',(bleach.clean(loser), loser_status))
+        ''', (bleach.clean(winner), winner_status))
+
+    # insert record in to match_players (looser)
+    # with matches id (just inserted)
+    cur.execute('''
+        INSERT INTO match_player (match_id, player_id, match_status)
+        VALUES (currval(pg_get_serial_sequence('matches','id')), %s, %s);
+        ''', (bleach.clean(loser), loser_status))
 
     DB.commit()
     DB.close()
- 
- 
+
+
 def swissPairings():
     """Returns a list of pairs of players for the next round of a match.
-  
+
     Assuming that there are an even number of players registered, each player
     appears exactly once in the pairings.  Each player is paired with another
     player with an equal or nearly-equal win record, that is, a player adjacent
     to him or her in the standings.
-  
+
     Returns:
       A list of tuples, each of which contains (id1, name1, id2, name2)
         id1: the first player's unique id
@@ -171,8 +171,7 @@ def swissPairings():
 
     for i in range(0, (len(standings)), 2):
         pairing.append(
-            [standings[i][0], standings[i][1], 
-            standings[i+1][0], standings[i+1][1]])
+            [standings[i][0], standings[i][1],
+             standings[i+1][0], standings[i+1][1]])
 
     return pairing
-

@@ -38,6 +38,3 @@ CREATE TABLE match_player (
 -- \i tournament.sql
 -- \d
 -- \d players
-
-
-

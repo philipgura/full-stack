@@ -144,6 +144,7 @@ def testPairings():
         if pair not in possible_pairs:
             raise ValueError(
                 "After one match, players with one win should be paired.")
+    print "10. After one match, players with one win are properly paired."
     standings = playerStandings()
     [id1, id2, id3, id4, id5, id6, id7, id8] = [row[0] for row in standings]
     reportMatch(id2, id1, 1)
@@ -154,7 +155,7 @@ def testPairings():
     if len(pairings) != 4:
         raise ValueError(
             "For eight players, swissPairings should return 4 pairs. Got {pairs}".format(pairs=len(pairings)))
-    print "2nd match."
+    print "2nd match done."
     standings = playerStandings()
     [id1, id2, id3, id4, id5, id6, id7, id8] = [row[0] for row in standings]
     reportMatch(id1, id2)
@@ -165,8 +166,7 @@ def testPairings():
     if len(pairings) != 4:
         raise ValueError(
             "For eight players, swissPairings should return 4 pairs. Got {pairs}".format(pairs=len(pairings)))
-    print "3rd match."
-    print "10. After one match, players with one win are properly paired."
+    print "3rd match done."
 
 
 if __name__ == '__main__':
